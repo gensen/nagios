@@ -259,7 +259,7 @@ end
 nagios_conf "hosts" do
   variables(
     :nodes => nodes,
-    :unmanaged_hosts => unmanaged_hosts
+    :unmanaged_hosts => unmanaged_hosts || []
   )
 end
 
