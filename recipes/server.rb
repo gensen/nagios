@@ -157,10 +157,16 @@ begin
   search(:nagios_hostgroups, '*:*') do |hg|
     hostgroup_list << hg['hostgroup_name']
     temp_hostgroup_array= Array.new
-    search(:node, "#{hg['search_query']}") do |n|
+    search_query = hg['search_query']
+    unless node['nagios']['multi_environment_monitoring']
+      search_query = "#{search_query} AND chef_environment:#{node.chef_environment}"
+    end
+    search(:node, "#{search_query}") do |n|
        temp_hostgroup_array << n['hostname']
     end
-    hostgroup_nodes[hg['hostgroup_name']] = temp_hostgroup_array.join(",")
+    unless temp_hostgroup_array.empty?
+      hostgroup_nodes[hg['hostgroup_name']] = temp_hostgroup_array.join(",")
+    end
   end
 rescue Net::HTTPServerException
   Chef::Log.info("Search for nagios_hostgroups data bag failed, so we'll just move on.")
